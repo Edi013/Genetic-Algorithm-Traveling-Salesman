@@ -1,5 +1,5 @@
 import random
-import numpy as np
+import numpy 
 
 def generatePopulation():
     population = []
@@ -8,6 +8,7 @@ def generatePopulation():
         random.shuffle(chromosome)
         population.append(chromosome)
     return population
+
 
 def getMap():
 # Barcelona, Madrid, Valencia, Bilbao, Seville, Malaga, Zaragoza, San Sebastian, A Coruna, Alicante :
@@ -50,10 +51,17 @@ def getCities():
     }
 
 
+def buildInitialChromosome():
+    chromosome = [index for index in range(len(cities))]
+    chromosome.pop(chromosome.index(start_city_index))
+    return chromosome
+
 def fitness(chromosome): 
     route_cost = []
-    for i in range(genes_number-1):
-        route_cost.append(distances[i][i+1])
+    for i in range(genes_number - 1): # genes_number = no. of cities - 1
+        route_cost.append(distances[chromosome[i]][chromosome[i+1]])
+        #print(distances[chromosome[i]][chromosome[i+1]])
+    #print(f'route cost {sum(route_cost)} - {distances[start_city_index][chromosome[0]]} - {distances[chromosome[len(chromosome)-1]][start_city_index]}')
     return sum(route_cost) + distances[start_city_index][chromosome[0]] + distances[chromosome[len(chromosome)-1]][start_city_index]
 
 
@@ -71,18 +79,17 @@ def calculateFitnesses():
     return fitnesses, chromosome_fitness_min, min_fitness
 
 
-def buildInitialChromosome():
-    chromosome = [index for index in range(genes_number)]
-    chromosome.pop(chromosome.index(start_city_index))
-    return chromosome
-
 
 def printChromosome(chromosome):
-    for i in range(genes_number-2):
+    print(f'Chromosome {chromosome} to analize : ')
+    start_city = cities.get(start_city_index)
+    print(f"{start_city} -> {cities.get(chromosome[0])} = {distances[start_city_index][chromosome[0]]}")
+    for i in range(genes_number - 1):
         city1 = cities.get(chromosome[i])
         city2 = cities.get(chromosome[i + 1])
         distance = distances[chromosome[i]][chromosome[i + 1]]
         print(f"{city1} -> {city2} = {distance}")
+    print(f"{cities.get(chromosome[genes_number - 1])} -> {start_city} = {distances[chromosome[genes_number-1]][start_city_index]}") 
 
 
 def displayRouteOfChromosome(chromosome_fitness_min, fitness_min):
@@ -90,9 +97,14 @@ def displayRouteOfChromosome(chromosome_fitness_min, fitness_min):
     print(f"Distanta traseu = {fitness_min}")
 
 
+def printMinimumPathForCurrentIteration(chromosome_fitness_min, fitness_min):
+    print(f'Minimal fitness from fitnesses {fitness_min}')
+    displayRouteOfChromosome(chromosome_fitness_min, fitness_min)
+
+
 def selectParents():
     if new_generation_size % 2 == 1:
-        raise ValueError(f"Number of parents - chidren must be even. It is {new_generation_size}")
+        raise ValueError(f"Number of parents - chidren must be even. It is {new_generation_size} .")
     parents = []
     for iteration in range(new_generation_size):
         indexes_of_chosen_chromosomes = [random.randint(0, chromosomes_number-1) for x in range(tournament_size)]
@@ -104,35 +116,116 @@ def selectParents():
         parents.append(winner)
     return parents
 
+def generarePuncteTaiere():
+    found = False
+    points = []
+    while (not found):
+        points = []
+        points.append(random.randint(1, genes_number-1))
+        points.append(random.randint(1, genes_number-1))
+        if( points[0] + 1 != points[1] and
+            points[0]     != points[1] + 1 and
+            points[0]     != points[1]):
+            found = True
+    points.sort()
+    return points
+
+def crossover(p1, p2):
+    cutPoints = generarePuncteTaiere()
+    print("Puncte taiere")
+    print(cutPoints)
+
+    # Pasul 1
+    copil1 = numpy.full(numarGene, -1)
+    copil2 = numpy.full(numarGene, -1)
+    copil1[cutPoints[0]:cutPoints[1]] = p1[cutPoints[0]:cutPoints[1]]
+    copil2[cutPoints[0]:cutPoints[1]] = p2[cutPoints[0]:cutPoints[1]]
+    copii = [copil1, copil2]
+
+    print("Copii dupa pasul 1")
+    print(copil1)
+    print(copil2)
+
+    # Pasul 2
+    aux1 = p1[cutPoints[1]:] + p1[:cutPoints[1]]
+    aux2 = p2[cutPoints[1]:] + p2[:cutPoints[1]]
+
+    print("Cromozomi auxiliari")
+    print(aux1)
+    print(aux2)
+
+    # Pasul 3
+    for indexCopil in range(len(copii)):
+        indexCromozom = cutPoints[1]
+        indexCromozomAuxiliar = cutPoints[1]
+        while -1 in copii[0]:
+            if aux2[indexCromozomAuxiliar] in copii[0] :
+                indexCromozomAuxiliar += 1
+                if indexCromozomAuxiliar == numarGene  :
+                    indexCromozomAuxiliar = 0
+            else:
+                copii[0][indexCromozom] = aux2[indexCromozomAuxiliar]
+                indexCromozom += 1
+                if indexCromozom == numarGene:
+                    indexCromozom = 0
+
+    for indexCopil in range(len(copii)):
+        indexCromozom = cutPoints[1]
+        indexCromozomAuxiliar = cutPoints[1]
+        while -1 in copii[1]:
+            if aux1[indexCromozomAuxiliar] in copii[1] :
+                indexCromozomAuxiliar += 1
+                if indexCromozomAuxiliar == numarGene  :
+                    indexCromozomAuxiliar = 0
+            else:
+                copii[1][indexCromozom] = aux1[indexCromozomAuxiliar]
+                indexCromozom += 1
+                if indexCromozom == numarGene:
+                    indexCromozom = 0
+
+    print(copii[0])
+    print(copii[1])
+
+
+def generateKids(parents):
+    i = 0
+    kids = []
+    while (i <= new_generation_size):
+        result = crossover(parents[i], parents[i+1])
+        i += 2
+        kids.append(result[0])
+        kids.append(result[1])
 
 # Initialization
 distances = getMap()
 cities = getCities()
 
-genes_number = len(distances[0]) # number of cities
+genes_number = len(cities) - 1 # '-1' for the starting city
 start_city_index = 1 
 initial_cromosome = buildInitialChromosome()
 
-chromosomes_number = 10
+chromosomes_number = 100
 population = generatePopulation()
 
 # Create fitnesses for popullation
 fitnesses, chromosome_fitness_min, fitness_min = calculateFitnesses()
 #print(fitnesses)
-#print(f'Minimal fitness from fitnesses {fitness_min}')
-#displayRouteOfChromosome(chromosome_fitness_min, fitness_min)
 
-# selectParents()
-parents = selectParents()
+# to save the average fitness of the population for displaying it's progression
+#printMinimumPathForCurrentIteration(chromosome_fitness_min, fitness_min)
+# --- not done
+
+# selecting parents
 tournament_size = 5 # more higher = faster accurate answer
-new_generation_size = 1 # must be even
+new_generation_size = int(chromosomes_number * 0.1) # must be even
+if(new_generation_size % 2 == 1):
+    new_generation_size+=1
+parents = selectParents()
 
+# create new chromosomes
+children = generateKids(parents)
 
-for i in range(new_generation_size):
-    print(parents[i])
-# createKids
-
-# mutation
+# mutation of newborns
 
 # appends kids to popullation
 
