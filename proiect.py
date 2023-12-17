@@ -51,7 +51,6 @@ def getCities():
 
 
 def fitness(chromosome): 
-    print(chromosome)
     route_cost = []
     for i in range(genes_number-1):
         route_cost.append(distances[i][i+1])
@@ -69,11 +68,7 @@ def calculateFitnesses():
         if(min_fitness > current_fitness):
             min_fitness = current_fitness
             chromosome_fitness_min = current_chromosome.copy()
-    
-    printChromosome(chromosome_fitness_min)
-    print(f"Distanta traseu = {min_fitness}")
-
-    return fitnesses
+    return fitnesses, chromosome_fitness_min, min_fitness
 
 
 def buildInitialChromosome():
@@ -89,6 +84,12 @@ def printChromosome(chromosome):
         distance = distances[chromosome[i]][chromosome[i + 1]]
         print(f"{city1} -> {city2} = {distance}")
 
+
+def displayRouteOfChromosome(chromosome_fitness_min, fitness_min):
+    printChromosome(chromosome_fitness_min)
+    print(f"Distanta traseu = {fitness_min}")
+
+
 # Initialization
 distances = getMap()
 cities = getCities()
@@ -99,10 +100,37 @@ genes_number = len(distances[0]) # number of cities
 initial_cromosome = buildInitialChromosome()
 population = generatePopulation()
 
-
-fitnesses = calculateFitnesses()
+# Create fitnesses for popullation
+fitnesses, chromosome_fitness_min, fitness_min = calculateFitnesses()
+#displayRouteOfChromosome(chromosome_fitness_min, fitness_min)
+#print(f'Minimal fitness from fitnesses {fitness_min}')
 #print(fitnesses)
 #print(min(fitnesses))
 
-tournament_size = 5
-#selectParents()
+# selectParents()
+parents = []
+tournament_size = 2
+children_number = 10
+for iteration in range(children_number):
+    indexes_of_tournament_iteration_chromosomes = [random.randint(0, chromosomes_number-1) for x in range(tournament_size)]
+    print(indexes_of_tournament_iteration_chromosomes)
+
+    tournament_iteration_chromosomes_fitnesses = [(fitnesses[indexes_of_tournament_iteration_chromosomes[i]], i) for i in range(tournament_size)]
+    print(tournament_iteration_chromosomes_fitnesses)
+    winner_fitness = min(tournament_iteration_chromosomes_fitnesses[0])
+    print(winner_fitness)
+    index_of_winner = tournament_iteration_chromosomes_fitnesses[0].index(winner_fitness)
+    print(index_of_winner)
+    parents.append(population[index_of_winner])
+
+for i in range(children_number):
+    print(parents[i])
+# createKids
+
+# mutation
+
+# appends kids to popullation
+
+# remove weak chromosomes from pop
+
+# end of loop
