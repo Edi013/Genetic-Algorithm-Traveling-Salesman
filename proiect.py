@@ -155,33 +155,32 @@ def crossover(p1, p2):
     # print(aux2)
 
     # Pasul 3
-    for indexCopil in range(len(children)):
-        indexCromozom = points[1]
-        indexCromozomAuxiliar = 0#points[1]
+    for iteration_number in range(genes_number):
+        chromosome_1_index = points[1]
+        chromosome_auxiliar_1_index = 0
         while -1 in children[0]:
-            if aux2[indexCromozomAuxiliar] in children[0] :
-                indexCromozomAuxiliar += 1
-                if indexCromozomAuxiliar == genes_number  :
-                    indexCromozomAuxiliar = 0
+            if aux2[chromosome_auxiliar_1_index] in children[0] :
+                chromosome_auxiliar_1_index += 1
+                if chromosome_auxiliar_1_index == genes_number  :
+                    chromosome_auxiliar_1_index = 0
             else:
-                children[0][indexCromozom] = aux2[indexCromozomAuxiliar]
-                indexCromozom += 1
-                if indexCromozom == genes_number:
-                    indexCromozom = 0
+                children[0][chromosome_1_index] = aux2[chromosome_auxiliar_1_index]
+                chromosome_1_index += 1
+                if chromosome_1_index == genes_number:
+                    chromosome_1_index = 0
 
-    for indexCopil in range(len(children)):
-        indexCromozom = points[1]
-        indexCromozomAuxiliar = points[1]
+        chromosome_2_index = points[1]
+        chromosome_auxiliar_2_index = 0
         while -1 in children[1]:
-            if aux1[indexCromozomAuxiliar] in children[1] :
-                indexCromozomAuxiliar += 1
-                if indexCromozomAuxiliar == genes_number  :
-                    indexCromozomAuxiliar = 0
+            if aux1[chromosome_auxiliar_2_index] in children[1] :
+                chromosome_auxiliar_2_index += 1
+                if chromosome_auxiliar_2_index == genes_number  :
+                    chromosome_auxiliar_2_index = 0
             else:
-                children[1][indexCromozom] = aux1[indexCromozomAuxiliar]
-                indexCromozom += 1
-                if indexCromozom == genes_number:
-                    indexCromozom = 0
+                children[1][chromosome_2_index] = aux1[chromosome_auxiliar_2_index]
+                chromosome_2_index += 1
+                if chromosome_2_index == genes_number:
+                    chromosome_2_index = 0
     # print("parinti -aux si copii:")
     # print(p1)
     # print(p2)
@@ -201,12 +200,50 @@ def generateKids(parents):
         kids.append(result[0])
         kids.append(result[1])
 
+
+def mutation(children):
+    def generareValoareAleatoare():
+        return numpy.random.rand()
+
+    def mutificatie():
+        for i in range(chromosomes_number):
+            if valoriAleatoare[i] <= probabilitateMutatie:
+                print(f"Cromozomul {i} :")
+                print(populatie[i])
+                
+                while(True):
+                    indexGena1 = random.randint(0, genes_number-1)
+                    indexGena2 = random.randint(0, genes_number-1)
+                    if(indexGena1 != indexGena2):
+                        break
+                geneAlese = [indexGena1, indexGena2]
+                geneAlese.sort()
+                print(f"Sunt alese genele {geneAlese[0]} si {geneAlese[1]}, bazat pe indexarea de la 0")
+                
+                population[i][indexGena1], population[i][indexGena2] = population[i][indexGena2], population[i][indexGena1]
+                print("Rezultat")
+                print(population[i])
+                print()
+
+    probabilitateMutatie = 0.2
+    print("Probabilitate mutatie")
+    print(probabilitateMutatie)
+
+    valoriAleatoare = []
+    for i in range(chromosomes_number):
+        valoriAleatoare.append(generareValoareAleatoare())
+    print("Valori aleatoare")
+    print(valoriAleatoare)
+
+    mutificatie()
+
+
 # Initialization
 distances = getMap()
 cities = getCities()
 
 genes_number = len(cities) - 1 # '-1' for the starting city
-start_city_index = 1 
+start_city_index = 1
 initial_cromosome = buildInitialChromosome()
 
 chromosomes_number = 100
@@ -231,7 +268,7 @@ parents = selectParents()
 children = generateKids(parents)
 
 # mutation of newborns
-
+mutation(children)
 # appends kids to popullation
 
 # remove weak chromosomes from pop
