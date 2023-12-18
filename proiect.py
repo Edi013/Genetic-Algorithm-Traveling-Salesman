@@ -12,17 +12,17 @@ def generatePopulation():
 
 
 def getMap():
-# Barcelona, Madrid, Valencia, Bilbao, Seville, Malaga, Zaragoza, San Sebastian, A Coruna, Alicante :
-# Barcelona         : 0, 626, 349, 608, 994, 980, 307, 566, 1083, 528
-# Madrid            : 626, 0, 360, 403, 531, 542, 320, 457, 593, 432
-# Valencia          : 349, 360, 0, 612, 655, 623, 309, 573, 950, 167
-# Bilbao            : 608, 403, 612, 0, 861, 925, 302, 101, 542, 786
-# Seville           : 994, 531, 655, 861, 0, 213, 847, 918, 926, 595
-# Malaga            : 980, 542, 623, 925, 213, 0, 841, 983, 1123, 477
-# Zaragoza          : 307, 320, 309, 302, 847, 841, 0, 264, 781, 484
-# SanSeb.           : 566, 457, 573, 101, 918, 983, 264, 0, 639, 746
-# A Coruna          : 1083, 593, 950, 542, 926, 1123, 781, 639, 0, 1071
-# Alicante          : 528, 432, 167, 786, 595, 477, 484, 746, 1071, 0
+    # Barcelona, Madrid, Valencia, Bilbao, Seville, Malaga, Zaragoza, San Sebastian, A Coruna, Alicante :
+    # Barcelona         : 0, 626, 349, 608, 994, 980, 307, 566, 1083, 528
+    # Madrid            : 626, 0, 360, 403, 531, 542, 320, 457, 593, 432
+    # Valencia          : 349, 360, 0, 612, 655, 623, 309, 573, 950, 167
+    # Bilbao            : 608, 403, 612, 0, 861, 925, 302, 101, 542, 786
+    # Seville           : 994, 531, 655, 861, 0, 213, 847, 918, 926, 595
+    # Malaga            : 980, 542, 623, 925, 213, 0, 841, 983, 1123, 477
+    # Zaragoza          : 307, 320, 309, 302, 847, 841, 0, 264, 781, 484
+    # SanSeb.           : 566, 457, 573, 101, 918, 983, 264, 0, 639, 746
+    # A Coruna          : 1083, 593, 950, 542, 926, 1123, 781, 639, 0, 1071
+    # Alicante          : 528, 432, 167, 786, 595, 477, 484, 746, 1071, 0
     return [
         [0, 626, 349, 608, 994, 980, 307, 566, 1083, 528],
         [626, 0, 360, 403, 531, 542, 320, 457, 593, 432],
@@ -62,8 +62,6 @@ def fitness(chromosome):
     route_cost = []
     for i in range(genes_number - 1): # genes_number = no. of cities - 1
         route_cost.append(distances[chromosome[i]][chromosome[i+1]])
-        #print(distances[chromosome[i]][chromosome[i+1]])
-    #print(f'route cost {sum(route_cost)} - {distances[start_city_index][chromosome[0]]} - {distances[chromosome[len(chromosome)-1]][start_city_index]}')
     return sum(route_cost) + distances[start_city_index][chromosome[0]] + distances[chromosome[len(chromosome)-1]][start_city_index]
 
 
@@ -145,8 +143,6 @@ def generateCrossoverPoints():
 
 def crossover(parent_1, parent_2):
     points = generateCrossoverPoints()
-    # print("Puncte taiere")
-    # print(points)
 
     # Step 1
     child_1 = [-1 for i in range(genes_number)] 
@@ -155,17 +151,9 @@ def crossover(parent_1, parent_2):
     child_2[points[0]:points[1]] = parent_2[points[0]:points[1]]
     children = [child_1, child_2]
 
-    # print("Kids after step 1")
-    # print(child_1)
-    # print(child_2)
-
     # Step 2
     aux1 = parent_1[points[1]:] + parent_1[:points[1]]
     aux2 = parent_2[points[1]:] + parent_2[:points[1]]
-
-    # print("Auxiliar chromosomes")
-    # print(aux1)
-    # print(aux2)
 
     # Step 3
     for iteration_number in range(genes_number):
@@ -181,7 +169,6 @@ def crossover(parent_1, parent_2):
                 chromosome_1_index += 1
                 if chromosome_1_index == genes_number:
                     chromosome_1_index = 0
-
     for iteration_number in range(genes_number):
         chromosome_2_index = points[1]
         chromosome_auxiliar_1_index = points[0]
@@ -195,13 +182,6 @@ def crossover(parent_1, parent_2):
                 chromosome_2_index += 1
                 if chromosome_2_index == genes_number:
                     chromosome_2_index = 0
-    # print("Parents, auxiliars and kids:")
-    # print(p1)
-    # print(p2)
-    # print(aux1)
-    # print(aux2)
-    # print(children[0])
-    # print(children[1])
     return children
 
 
@@ -261,25 +241,20 @@ def introduceNewGenerationIntoPopulation(population, children, new_generation_si
 
 
 def removeWeakChromosomesFromPopulation(population):
-    #print(population)
-    #print(len(population))
     while (len(population) != chromosomes_number):
         fitnesses, chromosome_fitness_min, fitness_min, chromosome_fitness_max, fitness_max = calculateFitnesses()
         population.remove(chromosome_fitness_max)
-    #print(population)
-    #print(len(population))
         
 
 def store_average_fitness_current_population(average_fitness, fitnesses):
     average_fitness.append(average_fitness_calculation(fitnesses))
-    print(fitnesses)
 
 
 def average_fitness_calculation(fitnesses):
     return sum(fitnesses) / len(fitnesses)
 
 
-
+print("--- START ---")
 # Initialization
 distances = getMap()
 cities = getCities()
@@ -299,7 +274,7 @@ store_average_fitness_current_population(average_fitness, fitnesses)
 
 new_generation_size = generateSizeOfNewGeneration()
 
-new_generations_number = 10
+new_generations_number = 1000
 contor = 1
 while(contor <= new_generations_number):    
     # Selecting parents
@@ -327,7 +302,6 @@ while(contor <= new_generations_number):
     contor += 1
 
 printMinimumPathForCurrentIteration(chromosome_fitness_min, fitness_min)
-print(average_fitness)
 
 # display grafic convergence
 plt.plot(average_fitness)
@@ -339,4 +313,5 @@ plt.xlabel('Iteration number')
 plt.ylabel('Average Fitness Value')
 plt.title('Average Fitness Progression')
 
+print("--- END ---")
 plt.show()
