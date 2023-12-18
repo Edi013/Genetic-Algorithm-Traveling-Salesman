@@ -56,6 +56,7 @@ def buildInitialChromosome():
     chromosome.pop(chromosome.index(start_city_index))
     return chromosome
 
+
 def fitness(chromosome): 
     route_cost = []
     for i in range(genes_number - 1): # genes_number = no. of cities - 1
@@ -77,7 +78,6 @@ def calculateFitnesses():
             min_fitness = current_fitness
             chromosome_fitness_min = current_chromosome.copy()
     return fitnesses, chromosome_fitness_min, min_fitness
-
 
 
 def printChromosome(chromosome):
@@ -119,6 +119,7 @@ def selectParents():
         parents.append(winner)
     return parents
 
+
 def generateCrossoverPoints():
     found = False
     points = []
@@ -133,13 +134,14 @@ def generateCrossoverPoints():
     points.sort()
     return points
 
+
 def crossover(parent_1, parent_2):
     points = generateCrossoverPoints()
     # print("Puncte taiere")
     # print(points)
 
     # Step 1
-    child_1 = [-1 for i in range(genes_number)] #numpy.full(genes_number, -1) 
+    child_1 = [-1 for i in range(genes_number)] 
     child_2 = [-1 for i in range(genes_number)]
     child_1[points[0]:points[1]] = parent_1[points[0]:points[1]]
     child_2[points[0]:points[1]] = parent_2[points[0]:points[1]]
@@ -160,28 +162,28 @@ def crossover(parent_1, parent_2):
     # Step 3
     for iteration_number in range(genes_number):
         chromosome_1_index = points[1]
-        chromosome_auxiliar_1_index = 0
+        chromosome_auxiliar_2_index = points[0]
         while -1 in children[0]:
-            if aux2[chromosome_auxiliar_1_index] in children[0] :
-                chromosome_auxiliar_1_index += 1
-                if chromosome_auxiliar_1_index == genes_number  :
-                    chromosome_auxiliar_1_index = 0
+            if aux2[chromosome_auxiliar_2_index] in children[0] :
+                chromosome_auxiliar_2_index += 1
+                if chromosome_auxiliar_2_index == genes_number:
+                    chromosome_auxiliar_2_index = 0
             else:
-                children[0][chromosome_1_index] = aux2[chromosome_auxiliar_1_index]
+                children[0][chromosome_1_index] = aux2[chromosome_auxiliar_2_index]
                 chromosome_1_index += 1
                 if chromosome_1_index == genes_number:
                     chromosome_1_index = 0
-                    
+
     for iteration_number in range(genes_number):
         chromosome_2_index = points[1]
-        chromosome_auxiliar_2_index = 0
+        chromosome_auxiliar_1_index = points[0]
         while -1 in children[1]:
-            if aux1[chromosome_auxiliar_2_index] in children[1] :
-                chromosome_auxiliar_2_index += 1
-                if chromosome_auxiliar_2_index == genes_number  :
-                    chromosome_auxiliar_2_index = 0
+            if aux1[chromosome_auxiliar_1_index] in children[1] :
+                chromosome_auxiliar_1_index += 1
+                if chromosome_auxiliar_1_index == genes_number:
+                    chromosome_auxiliar_1_index = 0
             else:
-                children[1][chromosome_2_index] = aux1[chromosome_auxiliar_2_index]
+                children[1][chromosome_2_index] = aux1[chromosome_auxiliar_1_index]
                 chromosome_2_index += 1
                 if chromosome_2_index == genes_number:
                     chromosome_2_index = 0
@@ -258,12 +260,12 @@ genes_number = len(cities) - 1 # '-1' for the starting city
 start_city_index = 1
 initial_cromosome = buildInitialChromosome()
 
-chromosomes_number = 2
+chromosomes_number = 100
 population = generatePopulation()
+print(population)
 
 # Create fitnesses for popullation
 fitnesses, chromosome_fitness_min, fitness_min = calculateFitnesses()
-#print(fitnesses)
 
 # to save the average fitness of the population for displaying it's progression
 #printMinimumPathForCurrentIteration(chromosome_fitness_min, fitness_min)
@@ -275,15 +277,15 @@ parents = selectParents()
 
 # Create new chromosomes
 children = generateKids(parents)
+print(parents)
+print(children)
 
 # mutation of newborns
 startMutation(children)
 
 # append kids to popullation
-print(population)
-print(children)
+
 introduceNewGenerationIntoPopulation(population, children, new_generation_size)
-print(population)
 
 # remove weak chromosomes from pop
 
