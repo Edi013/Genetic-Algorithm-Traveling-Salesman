@@ -197,7 +197,7 @@ def crossover(parent_1, parent_2):
     return children
 
 
-def generateKids(parents):
+def crossoverParents(parents):
     i = 0
     kids = []
     while (i <= new_generation_size-1):
@@ -252,6 +252,25 @@ def introduceNewGenerationIntoPopulation(population, children, new_generation_si
         population.append(children[i]) 
 
 
+def removeWeakChromosomesFromPopulation(population):
+    #print(population)
+    #print(len(population))
+    while (len(population) != chromosomes_number):
+        fitnesses, chromosome_fitness_min, fitness_min = calculateFitnesses()
+        population.remove(chromosome_fitness_min)
+    #print(population)
+    #print(len(population))
+        
+
+def store_average_fitness_current_population(average_fitness):
+    average_fitness.append(average_fitness())
+
+
+def average_fitness(fitnesses):
+    return sum(fitnesses) / len(fitnesses)
+
+
+
 # Initialization
 distances = getMap()
 cities = getCities()
@@ -262,31 +281,40 @@ initial_cromosome = buildInitialChromosome()
 
 chromosomes_number = 100
 population = generatePopulation()
-print(population)
 
-# Create fitnesses for popullation
-fitnesses, chromosome_fitness_min, fitness_min = calculateFitnesses()
+fitnesses = calculateFitnesses()
+average_fitness = []
+store_average_fitness_current_population(average_fitness)
 
-# to save the average fitness of the population for displaying it's progression
-#printMinimumPathForCurrentIteration(chromosome_fitness_min, fitness_min)
-# --- not done
-
-# Selecting parents
 new_generation_size = generateSizeOfNewGeneration()
-parents = selectParents()
 
-# Create new chromosomes
-children = generateKids(parents)
-print(parents)
-print(children)
+new_generations_number = 10
+contor = 1
+while(contor <= new_generations_number):    
+    # Selecting parents
+    parents = selectParents()
 
-# mutation of newborns
-startMutation(children)
+    # Create new chromosomes
+    children = crossoverParents(parents)
 
-# append kids to popullation
+    # mutation of newborns
+    startMutation(children)
 
-introduceNewGenerationIntoPopulation(population, children, new_generation_size)
+    # append kids to popullation
+    introduceNewGenerationIntoPopulation(population, children, new_generation_size)
 
-# remove weak chromosomes from pop
+    # remove weak chromosomes from pop
+    removeWeakChromosomesFromPopulation(population)
 
-# end of loop
+    # Create fitnesses for new popullation
+    fitnesses, chromosome_fitness_min, fitness_min = calculateFitnesses()
+
+    # Store average fitness of new population
+    store_average_fitness_current_population(average_fitness)
+
+    # end of loop
+    contor += 1
+
+printMinimumPathForCurrentIteration(chromosome_fitness_min, fitness_min)
+
+# display grafic convergence
