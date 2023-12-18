@@ -103,9 +103,12 @@ def printMinimumPathForCurrentIteration(chromosome_fitness_min, fitness_min):
 
 
 def selectParents():
+    parents = []
+    tournament_size = 5 # more higher = faster accurate answer
+
     if new_generation_size % 2 == 1:
         raise ValueError(f"Number of parents - chidren must be even. It is {new_generation_size} .")
-    parents = []
+    
     for iteration in range(new_generation_size):
         indexes_of_chosen_chromosomes = [random.randint(0, chromosomes_number-1) for x in range(tournament_size)]
         fitnesses_of_chosen_chromosomes = [fitnesses[indexes_of_chosen_chromosomes[i]] for i in range(tournament_size)]
@@ -130,31 +133,31 @@ def generateCrossoverPoints():
     points.sort()
     return points
 
-def crossover(p1, p2):
+def crossover(parent_1, parent_2):
     points = generateCrossoverPoints()
-    print("Puncte taiere")
-    print(points)
+    # print("Puncte taiere")
+    # print(points)
 
-    # Pasul 1
-    child_1 = numpy.full(genes_number, -1)
-    child_2 = numpy.full(genes_number, -1)
-    child_1[points[0]:points[1]] = p1[points[0]:points[1]]
-    child_2[points[0]:points[1]] = p2[points[0]:points[1]]
+    # Step 1
+    child_1 = [-1 for i in range(genes_number)] #numpy.full(genes_number, -1) 
+    child_2 = [-1 for i in range(genes_number)]
+    child_1[points[0]:points[1]] = parent_1[points[0]:points[1]]
+    child_2[points[0]:points[1]] = parent_2[points[0]:points[1]]
     children = [child_1, child_2]
 
-    # print("Copii dupa pasul 1")
+    # print("Kids after step 1")
     # print(child_1)
     # print(child_2)
 
-    # Pasul 2
-    aux1 = p1[points[1]:] + p1[:points[1]]
-    aux2 = p2[points[1]:] + p2[:points[1]]
+    # Step 2
+    aux1 = parent_1[points[1]:] + parent_1[:points[1]]
+    aux2 = parent_2[points[1]:] + parent_2[:points[1]]
 
-    # print("Cromozomi auxiliari")
+    # print("Auxiliar chromosomes")
     # print(aux1)
     # print(aux2)
 
-    # Pasul 3
+    # Step 3
     for iteration_number in range(genes_number):
         chromosome_1_index = points[1]
         chromosome_auxiliar_1_index = 0
@@ -168,7 +171,8 @@ def crossover(p1, p2):
                 chromosome_1_index += 1
                 if chromosome_1_index == genes_number:
                     chromosome_1_index = 0
-
+                    
+    for iteration_number in range(genes_number):
         chromosome_2_index = points[1]
         chromosome_auxiliar_2_index = 0
         while -1 in children[1]:
@@ -181,7 +185,7 @@ def crossover(p1, p2):
                 chromosome_2_index += 1
                 if chromosome_2_index == genes_number:
                     chromosome_2_index = 0
-    # print("parinti -aux si copii:")
+    # print("Parents, auxiliars and kids:")
     # print(p1)
     # print(p2)
     # print(aux1)
@@ -199,43 +203,51 @@ def generateKids(parents):
         i += 2
         kids.append(result[0])
         kids.append(result[1])
+    return kids
 
 
-def mutation(children):
-    def generareValoareAleatoare():
+def startMutation(children):
+    def generateRandomValue():
         return numpy.random.rand()
 
-    def mutificatie():
-        for i in range(chromosomes_number):
-            if valoriAleatoare[i] <= probabilitateMutatie:
-                print(f"Cromozomul {i} :")
-                print(populatie[i])
-                
+    def mutation(kids):
+        for i in range(new_generation_size):
+            if random_values[i] <= mutation_probability:
+                # print(f"Chromosome {i} :")
+                # print(kids[i])
                 while(True):
-                    indexGena1 = random.randint(0, genes_number-1)
-                    indexGena2 = random.randint(0, genes_number-1)
-                    if(indexGena1 != indexGena2):
+                    gene_1_index = random.randint(0, genes_number-1)
+                    gene_2_index = random.randint(0, genes_number-1)
+                    if(gene_1_index != gene_2_index):
                         break
-                geneAlese = [indexGena1, indexGena2]
-                geneAlese.sort()
-                print(f"Sunt alese genele {geneAlese[0]} si {geneAlese[1]}, bazat pe indexarea de la 0")
-                
-                population[i][indexGena1], population[i][indexGena2] = population[i][indexGena2], population[i][indexGena1]
-                print("Rezultat")
-                print(population[i])
-                print()
+                chosen_genes = [gene_1_index, gene_2_index]
+                chosen_genes.sort()
+                #print(f"Have been chosen genes {chosen_genes[0]} and {chosen_genes[1]}, 0 based index")
 
-    probabilitateMutatie = 0.2
-    print("Probabilitate mutatie")
-    print(probabilitateMutatie)
+                kids[i][gene_1_index], kids[i][gene_2_index] = kids[i][gene_2_index], kids[i][gene_1_index]
+                # print("Result")
+                # print(population[i])
+                # print()
 
-    valoriAleatoare = []
-    for i in range(chromosomes_number):
-        valoriAleatoare.append(generareValoareAleatoare())
-    print("Valori aleatoare")
-    print(valoriAleatoare)
+    mutation_probability = 0.2
 
-    mutificatie()
+    random_values = []
+    for i in range(new_generation_size):
+        random_values.append(generateRandomValue())
+
+    mutation(children)
+
+
+def generateSizeOfNewGeneration():
+    percent_of_population_size = 0.05
+    result = int(chromosomes_number * percent_of_population_size) 
+    result = result if result % 2 == 0 else result + 1
+    return  2 if result <= 1 else result
+
+
+def introduceNewGenerationIntoPopulation(population, children, new_generation_size):
+    for i in range (new_generation_size):
+        population.append(children[i]) 
 
 
 # Initialization
@@ -246,7 +258,7 @@ genes_number = len(cities) - 1 # '-1' for the starting city
 start_city_index = 1
 initial_cromosome = buildInitialChromosome()
 
-chromosomes_number = 100
+chromosomes_number = 2
 population = generatePopulation()
 
 # Create fitnesses for popullation
@@ -257,19 +269,21 @@ fitnesses, chromosome_fitness_min, fitness_min = calculateFitnesses()
 #printMinimumPathForCurrentIteration(chromosome_fitness_min, fitness_min)
 # --- not done
 
-# selecting parents
-tournament_size = 5 # more higher = faster accurate answer
-new_generation_size = int(chromosomes_number * 0.1) # must be even
-if(new_generation_size % 2 == 1):
-    new_generation_size+=1
+# Selecting parents
+new_generation_size = generateSizeOfNewGeneration()
 parents = selectParents()
 
-# create new chromosomes
+# Create new chromosomes
 children = generateKids(parents)
 
 # mutation of newborns
-mutation(children)
-# appends kids to popullation
+startMutation(children)
+
+# append kids to popullation
+print(population)
+print(children)
+introduceNewGenerationIntoPopulation(population, children, new_generation_size)
+print(population)
 
 # remove weak chromosomes from pop
 
