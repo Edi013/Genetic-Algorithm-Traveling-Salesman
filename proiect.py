@@ -116,7 +116,7 @@ def selectParents():
         parents.append(winner)
     return parents
 
-def generarePuncteTaiere():
+def generateCrossoverPoints():
     found = False
     points = []
     while (not found):
@@ -131,66 +131,71 @@ def generarePuncteTaiere():
     return points
 
 def crossover(p1, p2):
-    cutPoints = generarePuncteTaiere()
+    points = generateCrossoverPoints()
     print("Puncte taiere")
-    print(cutPoints)
+    print(points)
 
     # Pasul 1
-    copil1 = numpy.full(numarGene, -1)
-    copil2 = numpy.full(numarGene, -1)
-    copil1[cutPoints[0]:cutPoints[1]] = p1[cutPoints[0]:cutPoints[1]]
-    copil2[cutPoints[0]:cutPoints[1]] = p2[cutPoints[0]:cutPoints[1]]
-    copii = [copil1, copil2]
+    child_1 = numpy.full(genes_number, -1)
+    child_2 = numpy.full(genes_number, -1)
+    child_1[points[0]:points[1]] = p1[points[0]:points[1]]
+    child_2[points[0]:points[1]] = p2[points[0]:points[1]]
+    children = [child_1, child_2]
 
-    print("Copii dupa pasul 1")
-    print(copil1)
-    print(copil2)
+    # print("Copii dupa pasul 1")
+    # print(child_1)
+    # print(child_2)
 
     # Pasul 2
-    aux1 = p1[cutPoints[1]:] + p1[:cutPoints[1]]
-    aux2 = p2[cutPoints[1]:] + p2[:cutPoints[1]]
+    aux1 = p1[points[1]:] + p1[:points[1]]
+    aux2 = p2[points[1]:] + p2[:points[1]]
 
-    print("Cromozomi auxiliari")
-    print(aux1)
-    print(aux2)
+    # print("Cromozomi auxiliari")
+    # print(aux1)
+    # print(aux2)
 
     # Pasul 3
-    for indexCopil in range(len(copii)):
-        indexCromozom = cutPoints[1]
-        indexCromozomAuxiliar = cutPoints[1]
-        while -1 in copii[0]:
-            if aux2[indexCromozomAuxiliar] in copii[0] :
+    for indexCopil in range(len(children)):
+        indexCromozom = points[1]
+        indexCromozomAuxiliar = 0#points[1]
+        while -1 in children[0]:
+            if aux2[indexCromozomAuxiliar] in children[0] :
                 indexCromozomAuxiliar += 1
-                if indexCromozomAuxiliar == numarGene  :
+                if indexCromozomAuxiliar == genes_number  :
                     indexCromozomAuxiliar = 0
             else:
-                copii[0][indexCromozom] = aux2[indexCromozomAuxiliar]
+                children[0][indexCromozom] = aux2[indexCromozomAuxiliar]
                 indexCromozom += 1
-                if indexCromozom == numarGene:
+                if indexCromozom == genes_number:
                     indexCromozom = 0
 
-    for indexCopil in range(len(copii)):
-        indexCromozom = cutPoints[1]
-        indexCromozomAuxiliar = cutPoints[1]
-        while -1 in copii[1]:
-            if aux1[indexCromozomAuxiliar] in copii[1] :
+    for indexCopil in range(len(children)):
+        indexCromozom = points[1]
+        indexCromozomAuxiliar = points[1]
+        while -1 in children[1]:
+            if aux1[indexCromozomAuxiliar] in children[1] :
                 indexCromozomAuxiliar += 1
-                if indexCromozomAuxiliar == numarGene  :
+                if indexCromozomAuxiliar == genes_number  :
                     indexCromozomAuxiliar = 0
             else:
-                copii[1][indexCromozom] = aux1[indexCromozomAuxiliar]
+                children[1][indexCromozom] = aux1[indexCromozomAuxiliar]
                 indexCromozom += 1
-                if indexCromozom == numarGene:
+                if indexCromozom == genes_number:
                     indexCromozom = 0
-
-    print(copii[0])
-    print(copii[1])
+    # print("parinti -aux si copii:")
+    # print(p1)
+    # print(p2)
+    # print(aux1)
+    # print(aux2)
+    # print(children[0])
+    # print(children[1])
+    return children
 
 
 def generateKids(parents):
     i = 0
     kids = []
-    while (i <= new_generation_size):
+    while (i <= new_generation_size-1):
         result = crossover(parents[i], parents[i+1])
         i += 2
         kids.append(result[0])
