@@ -1,5 +1,6 @@
 import random
 import numpy 
+import matplotlib.pyplot as plt
 
 def generatePopulation():
     population = []
@@ -67,9 +68,13 @@ def fitness(chromosome):
 
 
 def calculateFitnesses():
-    fitnesses = []
     min_fitness = 10000000
     chromosome_fitness_min = []
+
+    max_fitness = 0
+    chromosome_fitness_max = []
+
+    fitnesses = []
     for i in range(chromosomes_number):
         current_chromosome = population[i]
         current_fitness = fitness(current_chromosome)
@@ -77,7 +82,10 @@ def calculateFitnesses():
         if(min_fitness > current_fitness):
             min_fitness = current_fitness
             chromosome_fitness_min = current_chromosome.copy()
-    return fitnesses, chromosome_fitness_min, min_fitness
+        if(max_fitness < current_fitness):
+            max_fitness = current_fitness
+            chromosome_fitness_max = current_chromosome.copy()
+    return fitnesses, chromosome_fitness_min, min_fitness, chromosome_fitness_max, max_fitness
 
 
 def printChromosome(chromosome):
@@ -102,7 +110,7 @@ def printMinimumPathForCurrentIteration(chromosome_fitness_min, fitness_min):
     displayRouteOfChromosome(chromosome_fitness_min, fitness_min)
 
 
-def selectParents():
+def selectParents(fitnesses):
     parents = []
     tournament_size = 5 # more higher = faster accurate answer
 
@@ -256,17 +264,18 @@ def removeWeakChromosomesFromPopulation(population):
     #print(population)
     #print(len(population))
     while (len(population) != chromosomes_number):
-        fitnesses, chromosome_fitness_min, fitness_min = calculateFitnesses()
-        population.remove(chromosome_fitness_min)
+        fitnesses, chromosome_fitness_min, fitness_min, chromosome_fitness_max, fitness_max = calculateFitnesses()
+        population.remove(chromosome_fitness_max)
     #print(population)
     #print(len(population))
         
 
-def store_average_fitness_current_population(average_fitness):
-    average_fitness.append(average_fitness())
+def store_average_fitness_current_population(average_fitness, fitnesses):
+    average_fitness.append(average_fitness_calculation(fitnesses))
+    print(fitnesses)
 
 
-def average_fitness(fitnesses):
+def average_fitness_calculation(fitnesses):
     return sum(fitnesses) / len(fitnesses)
 
 
@@ -282,9 +291,11 @@ initial_cromosome = buildInitialChromosome()
 chromosomes_number = 100
 population = generatePopulation()
 
-fitnesses = calculateFitnesses()
+fitnesses, chromosome_fitness_min, fitness_min, chromosome_fitness_max, fitness_max = calculateFitnesses()
+# print('init')
+# print(fitnesses)
 average_fitness = []
-store_average_fitness_current_population(average_fitness)
+store_average_fitness_current_population(average_fitness, fitnesses)
 
 new_generation_size = generateSizeOfNewGeneration()
 
@@ -292,7 +303,7 @@ new_generations_number = 10
 contor = 1
 while(contor <= new_generations_number):    
     # Selecting parents
-    parents = selectParents()
+    parents = selectParents(fitnesses)
 
     # Create new chromosomes
     children = crossoverParents(parents)
@@ -307,14 +318,25 @@ while(contor <= new_generations_number):
     removeWeakChromosomesFromPopulation(population)
 
     # Create fitnesses for new popullation
-    fitnesses, chromosome_fitness_min, fitness_min = calculateFitnesses()
+    fitnesses, chromosome_fitness_min, fitness_min, chromosome_fitness_max, fitness_max = calculateFitnesses()
 
     # Store average fitness of new population
-    store_average_fitness_current_population(average_fitness)
+    store_average_fitness_current_population(average_fitness, fitnesses)
 
     # end of loop
     contor += 1
 
 printMinimumPathForCurrentIteration(chromosome_fitness_min, fitness_min)
+print(average_fitness)
 
 # display grafic convergence
+plt.plot(average_fitness)
+
+plt.xlim(0, new_generations_number)
+plt.ylim(average_fitness[0], average_fitness[-1])
+
+plt.xlabel('Iteration number')
+plt.ylabel('Average Fitness Value')
+plt.title('Average Fitness Progression')
+
+plt.show()
